@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign Up - AskMe</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        body {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        .form-container {
+            background: white;
+            padding: 2.5rem;
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 400px;
+            margin: 1rem;
+        }
+
+        .form-container h2 {
+            color: #2c3e50;
+            text-align: center;
+            margin-bottom: 1.5rem;
+            font-weight: 600;
+        }
+
+        .form-group {
+            margin-bottom: 1.2rem;
+            position: relative;
+        }
+
+        .form-group i {
+            position: absolute;
+            left: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #95a5a6;
+        }
+
+        .password-toggle {
+            position: absolute;
+            right: 32px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #95a5a6;
+            cursor: pointer;
+            user-select: none;
+            z-index: 2;
+            padding: 5px;
+        }
+
+        .password-toggle:hover {
+            color: #3498db;
+        }
+
+        /* Specific styles for create password field */
+        #signupPassword + .password-toggle {
+            top: 45%;
+        }
+
+        #signupPassword + .password-toggle + .password-requirements {
+            margin-top: 0.5rem;
+        }
+
+        .form-control {
+            padding: 0.8rem 1rem 0.8rem 2.5rem;
+            border: 1px solid #e0e0e0;
+            border-radius: 5px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            padding-right: 2.5rem;
+        }
+
+        .form-control:focus {
+            border-color: #3498db;
+            box-shadow: 0 0 0 0.2rem rgba(52, 152, 219, 0.25);
+        }
+
+        .btn-signup {
+            background: #3498db;
+            color: white;
+            padding: 0.8rem;
+            border: none;
+            border-radius: 5px;
+            width: 100%;
+            font-size: 1rem;
+            font-weight: 500;
+            margin-top: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .btn-signup:hover {
+            background: #2980b9;
+            transform: translateY(-1px);
+        }
+
+        .login-link {
+            text-align: center;
+            margin-top: 1.5rem;
+            color: #7f8c8d;
+        }
+
+        .login-link a {
+            color: #3498db;
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+        .login-link a:hover {
+            text-decoration: underline;
+        }
+
+        #error-msg {
+            color: #e74c3c;
+            text-align: center;
+            margin-top: 1rem;
+            font-size: 0.9rem;
+        }
+
+        .logo {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .logo i {
+            font-size: 2.5rem;
+            color: #3498db;
+        }
+
+        .password-requirements {
+            font-size: 0.8rem;
+            color: #7f8c8d;
+            margin-top: 0.5rem;
+            padding-left: 2.5rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="form-container">
+        <div class="logo" style="text-align:center;margin-bottom:2rem;">
+            <img src="logo.jpg" alt="AskMe Logo" style="height:70px;width:auto;display:block;margin:0 auto 10px auto;box-shadow:0 4px 16px rgba(0,0,0,0.10);border-radius:16px;" />
+        </div>
+        <h2>Create Account</h2>
+        <form id="signupForm">
+            <div class="form-group">
+                <i class="fas fa-user"></i>
+                <input type="text" class="form-control" id="signupName" placeholder="Username" required>
+            </div>
+            <div class="form-group">
+                <i class="fas fa-envelope"></i>
+                <input type="email" class="form-control" id="signupEmail" placeholder="Email" required>
+            </div>
+            <div class="form-group">
+                <i class="fas fa-lock"></i>
+                <input type="password" class="form-control" id="signupPassword" placeholder="Create Password" required>
+                <span class="password-toggle" onclick="togglePassword('signupPassword')">
+                    <i class="fas fa-eye"></i>
+                </span>
+                <!-- <div class="password-requirements">
+                    Password must be at least 8 characters long
+                </div> -->
+            </div>
+            <div class="form-group">
+                <i class="fas fa-lock"></i>
+                <input type="password" class="form-control" id="confirmPassword" placeholder="Confirm Password" required>
+                <span class="password-toggle" onclick="togglePassword('confirmPassword')">
+                    <i class="fas fa-eye"></i>
+                </span>
+            </div>
+            <p id="error-msg" style="display: none;">Passwords do not match.</p>
+            <button type="submit" class="btn-signup">Create Account</button>
+        </form>
+        <div class="login-link">
+            <p>Already have an account? <a href="login.html">Sign In</a></p>
+        </div>
+    </div>
+
+    <script src="js/signup.js"></script>
+    <script>
+        function togglePassword(inputId) {
+            const passwordInput = document.getElementById(inputId);
+            const toggleIcon = passwordInput.nextElementSibling.querySelector('i');
+            
+            if (passwordInput.type === 'password') {
+                passwordInput.type = 'text';
+                toggleIcon.classList.remove('fa-eye');
+                toggleIcon.classList.add('fa-eye-slash');
+            } else {
+                passwordInput.type = 'password';
+                toggleIcon.classList.remove('fa-eye-slash');
+                toggleIcon.classList.add('fa-eye');
+            }
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>AskMe - Home</title>
+  <script src="js/main.js"></script>
+  <link rel="stylesheet" href="css/style.css" />
+  <style>
+    #searchInput:focus {
+      border-color: #007bff;
+    }
+
+    #search-section {
+      padding: 20px;
+      background: #ffffff;
+      border-radius: 5px;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+      margin-top: 200px;
+      margin-bottom: 5px;
+      display: flex;
+      gap: 10px;
+    }
+
+    #searchInput {
+      flex: 1;
+      padding: 10px;
+      font-size: 16px;
+      min-width: 200px;
+    }
+
+    button {
+      padding: 10px 10px;
+      background-color: #007bff;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      width: auto;
+      margin-bottom: 15px;
+    }
+
+    button:hover {
+      background-color: #0056b3;
+    }
+
+    #qaList {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 20px;
+      padding: 20px;
+    }
+
+    .qa-card {
+      background: #ffffff;
+      padding: 15px;
+      border-radius: 10px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      display: flex;
+      flex-direction: column;
+    }
+
+    .qa-card h3 {
+      margin: 0 0 10px 0;
+      color: #007bff;
+    }
+
+    .qa-card p {
+      margin: 0;
+      color: #444;
+    }
+
+    #showcase {
+      margin-top: 40px;
+      padding: 20px;
+      background-color: #f9f9f9;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      border-radius: 10px;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Navigation Bar -->
+  <nav class="navbar">
+    <div class="logo">
+      <a href="index.html">
+        <img src="logo.jpg" alt="AskMe Logo" style="height:40px;width:auto;margin-right:10px;vertical-align:middle;" />
+      </a>
+      <div id="welcomeMessage"></div>
+    </div>
+    <ul class="nav-links">
+      <li><a href="#" onclick="checkLoginBeforeAdd1()">Visit the Q&A Portal</a></li>
+      <li><a href="#" onclick="checkLoginBeforeAdd()">Add a new Question</a></li>
+      <li><a href="#">Tags</a></li>
+      <li id="login-signup-links">
+        <a href="login.html" id="loginLink">Login</a>  
+        <a href="signup.html" id="signupLink">Sign Up</a>
+      </li>
+      <li id="profile-icon" style="display: none;">
+        <div class="profile-circle" id="profileCircle" onclick="toggleProfileMenu()"></div>
+        <div id="profileMenu" class="profile-menu" style="display: none;">
+          <p id="profileUsername"></p>
+          <button onclick="logout()">Log Out</button>
+        </div>
+      </li>
+    </ul>
+  </nav>
+
+  <main>
+    <!-- 🔍 Search Section -->
+    <section id="search-section">
+      <input type="text" id="searchInput" placeholder="What do you want to know ?" />
+      <button onclick="searchQuestion()">Search</button>
+    </section>
+
+    <!-- 📋 Showcase Questions and Answers -->
+    <section id="showcase">
+      <h2>Popular Questions</h2>
+      <div id="qaList"></div>
+    </section>
+  </main>
+
+  <script>
+    // Dummy Display Data (fixed & unchanging)
+   const dummyData = [
+  {
+    id: 1,
+    question: "What is the purpose of the AskMe platform?",
+    answer: "AskMe is a community-driven Q&A platform designed to facilitate knowledge sharing within organizations."
+  },
+  {
+    id: 2,
+    question: "How do I submit a new question?",
+    answer: "To submit a new question, please navigate to the 'Add a new Question' section available in the main navigation menu."
+  },
+  {
+    id: 3,
+    question: "Can I edit my answer after submission?",
+    answer: "At this time, editing answers post-submission is not supported, but this feature is planned for future updates."
+  },
+  {
+    id: 4,
+    question: "Is it possible to access existing questions and answers without posting?",
+    answer: "Yes, users are encouraged to browse and review all existing questions and answers to benefit from shared organizational knowledge without needing to post."
+  }
+];
+
+
+    const qaList = document.getElementById("qaList");
+
+    function displayQuestions(data) {
+      // Only use dummyData — do NOT use localStorage or append new ones
+      qaList.innerHTML = "";
+
+      data.forEach(item => {
+        const card = document.createElement("div");
+        card.className = "qa-card";
+
+        const q = document.createElement("h3");
+        q.textContent = item.question;
+
+        const a = document.createElement("p");
+        a.textContent = item.answer ? item.answer : "No answer yet.";
+
+        card.appendChild(q);
+        card.appendChild(a);
+        qaList.appendChild(card);
+      });
+    }
+
+    function searchQuestion() {
+      const isLoggedIn = localStorage.getItem('isLoggedIn');
+      if (isLoggedIn !== 'true') {
+        alert('Please log in to continue with the search.');
+        window.location.href = 'login.html';
+        return;
+      }
+
+      const query = document.getElementById("searchInput").value.trim();
+      if (!query) {
+        alert('Please enter a search term');
+        return;
+      }
+      window.location.href = `questions-answers.html?search=${encodeURIComponent(query)}`;
+    }
+
+    // Add event listener for Enter key in search input
+    document.getElementById("searchInput").addEventListener("keypress", function(event) {
+      if (event.key === "Enter") {
+        event.preventDefault();
+        searchQuestion();
+      }
+    });
+
+    // Only show the dummyData
+    displayQuestions(dummyData);
+
+    // Profile logic
+    window.onload = function() {
+      const isLoggedIn = localStorage.getItem('isLoggedIn');
+      const loginSignupLinks = document.getElementById('login-signup-links');
+      const profileIcon = document.getElementById('profile-icon');
+      const profileCircle = document.getElementById('profileCircle');
+      const profileUsername = document.getElementById('profileUsername');
+      const welcomeMessage = document.getElementById('welcomeMessage');
+      const username = localStorage.getItem('username');
+
+      if (isLoggedIn === 'true' && username) {
+        loginSignupLinks.style.display = 'none';
+        profileIcon.style.display = 'inline-block';
+        profileCircle.textContent = username.charAt(0).toUpperCase();
+        profileUsername.textContent = username;
+        welcomeMessage.textContent = `Welcome back, ${username}!`;
+      } else {
+        loginSignupLinks.style.display = 'inline-block';
+        profileIcon.style.display = 'none';
+      }
+    };
+
+    function toggleProfileMenu() {
+      const profileMenu = document.getElementById('profileMenu');
+      profileMenu.style.display = (profileMenu.style.display === 'none' || profileMenu.style.display === '') ? 'block' : 'none';
+    }
+
+    function logout() {
+      localStorage.removeItem('isLoggedIn');
+      localStorage.removeItem('username');
+      document.getElementById('profile-icon').style.display = 'none';
+      document.getElementById('login-signup-links').style.display = 'inline-block';
+      window.location.href = 'landing.html';
+    }
+    function checkLoginBeforeAdd() {
+  const isLoggedIn = localStorage.getItem('isLoggedIn');
+  if (isLoggedIn === 'true') {
+    window.location.href = 'add-new-question.html';
+  } else {
+    alert('Please log in to add a new question.');
+    window.location.href = 'login.html';
+  }
+}
+function checkLoginBeforeAdd1() {
+  const isLoggedIn = localStorage.getItem('isLoggedIn');
+  if (isLoggedIn === 'true') {
+    window.location.href = 'questions-answers.html';
+  } else {
+    alert('Please log in to continue.');
+    window.location.href = 'login.html';
+  }
+}
+  </script>
+</body>
+</html>

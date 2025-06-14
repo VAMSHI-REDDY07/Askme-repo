@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Add new Question - AskMe</title>
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+  <!-- Navigation Bar -->
+  <nav class="navbar">
+    <div class="logo">
+      <a href="index.html">
+        <img src="logo.jpg" alt="AskMe Logo" style="height:40px;width:auto;margin-right:10px;vertical-align:middle;" />
+      </a>
+      <div id="welcomeMessage"></div>
+    </div>
+    <ul class="nav-links">
+      <li><a href="index.html">Home</a></li>
+      <li><a href="#">Tags</a></li>
+      <li id="login-signup-links">
+        <a href="login.html" id="loginLink">Login</a>  
+        <a href="signup.html" id="signupLink">Sign Up</a>
+      </li>
+      <li id="profile-icon" style="display: none;">
+        <div class="profile-circle" id="profileCircle" onclick="toggleProfileMenu()"></div>
+        <div id="profileMenu" class="profile-menu" style="display: none;">
+          <p id="profileUsername"></p>
+          <button onclick="logout()">Log Out</button>
+        </div>
+      </li>
+    </ul>
+  </nav>
+  
+  <main class="add-question-container">
+    <h2>Submit Your Question</h2>
+    <form id="questionForm">
+      <input type="text" id="questionTitle" placeholder="Enter your question" required />
+      <input type="text" id="tags" placeholder="Enter tags (optional)" />
+      <button type="submit">Submit</button>
+    </form>
+  </main>
+
+  <script src="js/main.js"></script>
+  <script>
+    document.getElementById("questionForm").addEventListener("submit", function (e) {
+      e.preventDefault(); // Prevent the form from submitting normally
+
+      // Get the question title and tags
+      const title = document.getElementById("questionTitle").value.trim();
+      const tags = document.getElementById("tags").value.trim();
+
+      // Check if the user is logged in
+      const isLoggedIn = localStorage.getItem("isLoggedIn");
+      if (isLoggedIn !== "true") {
+        alert("Please log in to submit a question.");
+        window.location.href = "login.html"; // Redirect to login if not logged in
+        return;
+      }
+
+      // Save the question with optional tags
+      saveQuestion(title, tags);
+    });
+
+    // Save the question to the backend and MySQL database
+    function saveQuestion(title, tags) {
+      const newQuestion = {
+        questionTitle: title,
+        tags: tags, // Optional, can be an empty string
+      };
+
+      // Send the question to the backend using fetch
+      fetch('http://localhost:3000/questions', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(newQuestion),
+      })
+        .then((response) => {
+          if (response.ok) {
+            alert('Question submitted successfully!');
+            window.location.href = 'index.html'; // Redirect back to the home page after submission
+          } else {
+            alert('Error submitting question');
+          }
+        })
+        .catch((error) => {
+          console.error('Error:', error);
+          alert('Error submitting question');
+        });
+    }
+
+    window.onload = function() {
+      const isLoggedIn = localStorage.getItem('isLoggedIn');
+      const loginSignupLinks = document.getElementById('login-signup-links');
+      const profileIcon = document.getElementById('profile-icon');
+      const profileCircle = document.getElementById('profileCircle');
+      const profileUsername = document.getElementById('profileUsername');
+      const welcomeMessage = document.getElementById('welcomeMessage');
+      const username = localStorage.getItem('username');
+
+      if (isLoggedIn === 'true' && username) {
+        loginSignupLinks.style.display = 'none';
+        profileIcon.style.display = 'inline-block';
+        profileCircle.textContent = username.charAt(0).toUpperCase();
+        profileUsername.textContent = username;
+        welcomeMessage.textContent = `Welcome back, ${username}!`;
+      } else {
+        loginSignupLinks.style.display = 'inline-block';
+        profileIcon.style.display = 'none';
+      }
+    };
+
+    function toggleProfileMenu() {
+      const profileMenu = document.getElementById('profileMenu');
+      profileMenu.style.display = (profileMenu.style.display === 'none' || profileMenu.style.display === '') ? 'block' : 'none';
+    }
+
+    function logout() {
+      localStorage.removeItem('isLoggedIn');
+      localStorage.removeItem('username');
+      document.getElementById('profile-icon').style.display = 'none';
+      document.getElementById('login-signup-links').style.display = 'inline-block';
+      window.location.href = 'landing.html';
+    }
+  </script>
+</body>
+</html>

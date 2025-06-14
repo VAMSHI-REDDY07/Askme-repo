@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>AskMe - Answer</title>
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+
+  <!-- Navigation Bar -->
+  <nav class="navbar">
+    <div class="logo">
+      <a href="index.html">
+        <img src="logo.jpg" alt="AskMe Logo" style="height:40px;width:auto;margin-right:10px;vertical-align:middle;" />
+      </a>
+      <div id="welcomeMessage"></div>
+    </div>
+    <ul class="nav-links">
+      <li><a href="index.html">Home</a></li>
+      <li><a href="add-question.html">Ask a Question</a></li>
+      <li><a href="#">Tags</a></li>
+      <li id="login-signup-links">
+        <a href="login.html" id="loginLink">Login</a>  
+        <a href="signup.html" id="signupLink">Sign Up</a>
+      </li>
+      <li id="profile-icon" style="display: none;">
+        <div class="profile-circle" id="profileCircle" onclick="toggleProfileMenu()"></div>
+        <div id="profileMenu" class="profile-menu" style="display: none;">
+          <p id="profileUsername"></p>
+          <button onclick="logout()">Log Out</button>
+        </div>
+      </li>
+    </ul>
+  </nav>
+
+  <!-- Question and Answer Section -->
+  <section id="qa-section">
+    <div id="resultsHeader"></div>
+    <div id="qaContainer"></div>
+  </section>
+
+  <script>
+    window.onload = function () {
+      const isLoggedIn = localStorage.getItem('isLoggedIn');
+      const loginSignupLinks = document.getElementById('login-signup-links');
+      const profileIcon = document.getElementById('profile-icon');
+      const profileCircle = document.getElementById('profileCircle');
+      const profileUsername = document.getElementById('profileUsername');
+      const welcomeMessage = document.getElementById('welcomeMessage');
+      const username = localStorage.getItem('username');
+  
+      if (isLoggedIn === 'true' && username) {
+        loginSignupLinks.style.display = 'none';
+        profileIcon.style.display = 'inline-block';
+        profileCircle.textContent = username.charAt(0).toUpperCase();
+        profileUsername.textContent = username;
+        welcomeMessage.textContent = `Welcome back, ${username}!`;
+      } else {
+        loginSignupLinks.style.display = 'inline-block';
+        profileIcon.style.display = 'none';
+      }
+  
+      const urlParams = new URLSearchParams(window.location.search);
+      const id = parseInt(urlParams.get('id'), 10);
+      const query = urlParams.get('query');
+      const qaContainer = document.getElementById("qaContainer");
+      const resultsHeader = document.getElementById("resultsHeader");
+  
+      fetch('http://localhost:3000/questions')
+        .then(res => res.json())
+        .then(allQuestions => {
+          if (query) {
+            const words = query.toLowerCase().split(" ");
+            const results = allQuestions.filter(q =>
+              words.every(word => q.question.toLowerCase().includes(word))
+            );
+  
+            if (results.length > 0) {
+              resultsHeader.innerHTML = `<h3>Results for: <em>"${query}"</em></h3>`;
+              qaContainer.innerHTML = "";
+  
+              results.forEach(q => renderQA(q));
+            } else {
+              resultsHeader.innerHTML = `<h3>No results found for: <em>"${query}"</em></h3>`;
+              qaContainer.textContent = "No matching questions found.";
+            }
+          } else if (!isNaN(id)) {
+            const result = allQuestions.find(q => q.id === id);
+            if (result) {
+              resultsHeader.innerHTML = `<h3>Question: <em>"${result.question}"</em></h3>`;
+              qaContainer.innerHTML = "";
+              renderQA(result);
+            } else {
+              resultsHeader.innerHTML = `<h3>No matching question found.</h3>`;
+              qaContainer.textContent = "No matching question found.";
+            }
+          }
+        })
+        .catch(error => {
+          console.error('Error fetching questions:', error);
+          resultsHeader.innerHTML = "<h3>Error loading questions.</h3>";
+          qaContainer.textContent = "Could not connect to the backend.";
+        });
+    };
+  
+    function renderQA(question) {
+      const qaContainer = document.getElementById("qaContainer");
+  
+      const qElem = document.createElement("p");
+      qElem.innerHTML = `<strong>Question:</strong> ${question.question}`;
+      qaContainer.appendChild(qElem);
+  
+      const aElem = document.createElement("p");
+      aElem.innerHTML = `<strong>Answer:</strong> ${question.answer || "No answer yet."}`;
+      qaContainer.appendChild(aElem);
+  
+      const submitAnswerButton = document.createElement("button");
+      submitAnswerButton.textContent = "Submit New Answer";
+      submitAnswerButton.onclick = function () {
+        promptNewAnswer(question.id);
+      };
+      qaContainer.appendChild(submitAnswerButton);
+      qaContainer.appendChild(document.createElement("hr"));
+    }
+  
+    function promptNewAnswer(questionId) {
+      const newAnswer = prompt("Please enter your answer:");
+      if (newAnswer) {
+        saveNewAnswer(questionId, newAnswer);
+      }
+    }
+  
+    function saveNewAnswer(questionId, newAnswer) {
+      fetch('http://localhost:3000/answers', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          question_id: questionId,
+          answer_text: newAnswer
+        })
+      })
+        .then(response => {
+          if (!response.ok) {
+            throw new Error("Failed to submit answer.");
+          }
+          alert("Answer submitted successfully!");
+          window.location.reload();
+        })
+        .catch(error => {
+          console.error("Error submitting answer:", error);
+          alert("There was a problem submitting your answer.");
+        });
+    }
+  
+    function toggleProfileMenu() {
+      const profileMenu = document.getElementById('profileMenu');
+      profileMenu.style.display = (profileMenu.style.display === 'none' || profileMenu.style.display === '') ? 'block' : 'none';
+    }
+  
+    function logout() {
+      localStorage.removeItem('isLoggedIn');
+      localStorage.removeItem('username');
+      document.getElementById('profile-icon').style.display = 'none';
+      document.getElementById('login-signup-links').style.display = 'inline-block';
+      window.location.href = 'landing.html';
+    }
+  </script>
+  
+</body>
+</html>
