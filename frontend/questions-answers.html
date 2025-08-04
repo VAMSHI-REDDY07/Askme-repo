@@ -201,6 +201,40 @@
       background-color: #0056b3;
     }
 
+    /* Style for action buttons */
+    .qa-actions {
+      margin-top: 10px;
+      display: flex;
+      gap: 10px;
+    }
+
+    .qa-actions button {
+      padding: 8px 16px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 14px;
+      transition: background-color 0.3s ease;
+    }
+
+    .qa-actions button:first-child {
+      background-color: #007bff;
+      color: white;
+    }
+
+    .qa-actions button:first-child:hover {
+      background-color: #0056b3;
+    }
+
+    .qa-actions button:last-child {
+      background-color: #28a745;
+      color: white;
+    }
+
+    .qa-actions button:last-child:hover {
+      background-color: #218838;
+    }
+
   </style>
 </head>
 <body>
@@ -404,6 +438,13 @@
           addAnswerBtn.textContent = "Add Answer";
           addAnswerBtn.onclick = () => openAnswerModal(q.id);
           qActions.appendChild(addAnswerBtn);
+
+          // Add Copy Link button
+          const copyLinkBtn = document.createElement("button");
+          copyLinkBtn.textContent = "Copy Link";
+          copyLinkBtn.onclick = () => copyQuestionLink(q.id, q.question_text);
+          qActions.appendChild(copyLinkBtn);
+
           qDiv.appendChild(qActions);
 
           qaSection.appendChild(qDiv);
@@ -459,6 +500,36 @@ function openAnswerModal(questionId) {
 document.getElementById('closeModal').onclick = function () {
   document.getElementById('answerModal').style.display = 'none';
 };
+
+// Copy question link function
+function copyQuestionLink(questionId, questionText) {
+  const currentUrl = window.location.origin + window.location.pathname;
+  const questionUrl = `${currentUrl}?question=${questionId}`;
+  
+  // Create a temporary textarea to copy the text
+  const textarea = document.createElement('textarea');
+  textarea.value = questionUrl;
+  document.body.appendChild(textarea);
+  textarea.select();
+  
+  try {
+    document.execCommand('copy');
+    // Show success message
+    const originalText = event.target.textContent;
+    event.target.textContent = 'Copied!';
+    event.target.style.backgroundColor = '#6c757d';
+    
+    setTimeout(() => {
+      event.target.textContent = originalText;
+      event.target.style.backgroundColor = '#28a745';
+    }, 2000);
+  } catch (err) {
+    console.error('Failed to copy link:', err);
+    alert('Failed to copy link. Please copy manually: ' + questionUrl);
+  }
+  
+  document.body.removeChild(textarea);
+}
 
 // Submit answer form
 document.getElementById('answerForm').addEventListener('submit', async function (e) {
